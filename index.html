@@ -1,0 +1,36 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel</title>
+  </head>
+  <body>
+    <h1>Admin Panel</h1>
+    <label for="userId">Enter User ID to Generate Link: </label>
+    <input type="text" id="userId" />
+    <button id="generateLinkBtn">Generate Link</button>
+
+    <p>Generated Link: <span id="generatedLink"></span></p>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const generateLinkBtn = document.getElementById("generateLinkBtn");
+      const userIdInput = document.getElementById("userId");
+      const generatedLinkSpan = document.getElementById("generatedLink");
+
+      generateLinkBtn.addEventListener("click", () => {
+        const userId = userIdInput.value;
+        if (userId) {
+          socket.emit("generate-link", userId);
+        }
+      });
+
+      socket.on("generated-link", (link) => {
+        generatedLinkSpan.textContent = link;
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!-- public/user.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User - Webcam Stream</title>
+  </head>
+  <body>
+    <h1>Welcome User</h1>
+    <p>This is your webcam stream, but the admin can view your webcam.</p>
+
+    <div>
+      <h2>Your Webcam:</h2>
+      <img src="path-to-your-static-image.jpg" alt="Static Image" />
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const userId = "user123"; // Use the same ID as the admin link
+
+      // Notify admin when the user has started the session
+      socket.emit("start-webcam", userId);
+
+      // Trigger webcam on page load
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then((stream) => {
+          const videoTrack = stream.getVideoTracks()[0];
+          const peerConnection = new RTCPeerConnection();
+
+          // Add the user's webcam stream to the connection
+          peerConnection.addTrack(videoTrack);
+
+          peerConnection
+            .createOffer()
+            .then((offer) => {
+              return peerConnection.setLocalDescription(offer);
+            })
+            .then(() => {
+              socket.emit("offer", peerConnection.localDescription, userId);
+            });
+
+          // Handle ICE candidates
+          peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+              socket.emit("ice-candidate", event.candidate, userId);
+            }
+          };
+        })
+        .catch((err) => console.log("Error accessing webcam: ", err));
+    </script>
+  </body>
+</html>

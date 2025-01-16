@@ -1,0 +1,48 @@
+<!-- public/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Webcam Session</title>
+  </head>
+  <body>
+    <h1>Admin Panel</h1>
+    <button id="startSessionBtn">Start Webcam Session</button>
+
+    <div>
+      <h2>User's Webcam:</h2>
+      <video id="remoteVideo" autoplay></video>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const startSessionBtn = document.getElementById("startSessionBtn");
+      const remoteVideo = document.getElementById("remoteVideo");
+      let userId = "user123"; // Hardcoded or passed dynamically
+
+      startSessionBtn.addEventListener("click", () => {
+        socket.emit("start-session", userId);
+      });
+
+      socket.on("admin-session-started", () => {
+        // Start video call with user
+        startWebRTCConnection();
+      });
+
+      function startWebRTCConnection() {
+        // WebRTC connection setup for admin (only sees user webcam)
+        const peerConnection = new RTCPeerConnection();
+
+        // When user sends their webcam stream, display it in the video element
+        peerConnection.ontrack = (event) => {
+          remoteVideo.srcObject = event.streams[0];
+        };
+
+        // Offer creation and ICE candidate handling omitted for brevity
+        // Create and send offer, handle ICE candidates
+      }
+    </script>
+  </body>
+</html>
